@@ -136,14 +136,10 @@ class VisaireApp {
                 <div class="d-flex justify-content-between align-items-center">
                     <small class="text-muted">Prompt: "${prompt}"</small>
                     <div>
-                        <a href="${videoUrl}" download class="btn btn-outline-primary btn-sm me-2">
+                        <a href="${videoUrl}" download class="btn btn-outline-primary btn-sm">
                             <i class="fas fa-download me-1"></i>
                             Download
                         </a>
-                        <button class="btn btn-outline-secondary btn-sm" onclick="app.shareVideo('${videoUrl}', '${prompt}')">
-                            <i class="fas fa-share me-1"></i>
-                            Share
-                        </button>
                     </div>
                 </div>
             </div>
@@ -206,24 +202,6 @@ class VisaireApp {
         this.animationHistory = this.animationHistory.filter(item => item.id !== id);
         localStorage.setItem('animationHistory', JSON.stringify(this.animationHistory));
         this.renderHistory();
-    }
-
-    shareVideo(videoUrl, prompt) {
-        if (navigator.share) {
-            navigator.share({
-                title: 'Visaire Animation',
-                text: `Check out this animation: "${prompt}"`,
-                url: window.location.origin + videoUrl
-            });
-        } else {
-            // Fallback: copy to clipboard
-            const shareUrl = window.location.origin + videoUrl;
-            navigator.clipboard.writeText(shareUrl).then(() => {
-                alert('Video URL copied to clipboard!');
-            }).catch(() => {
-                prompt('Copy this URL to share:', shareUrl);
-            });
-        }
     }
 
     clearHistory() {
