@@ -31,58 +31,64 @@ Visaire is a web application that generates mathematical animations using AI. Si
    cd visaire
    ```
 
-2. **Install uv package manager**
+2. **Install system dependencies** (macOS)
    ```bash
+   brew install cairo pkg-config ffmpeg
+   ```
+
+3. **Install Python dependencies**
+
+   **Option A: Using pip (Recommended)**
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   pip install -r requirements.txt
+   ```
+
+   **Option B: Using uv package manager**
+   ```bash
+   # Install uv
    curl -LsSf https://astral.sh/uv/install.sh | sh
-   ```
    
-   Or if you prefer pip:
-   ```bash
-   pip install uv
+   # Install dependencies
+   uv sync
    ```
 
-3. **Initialize the project**
-   ```bash
-   uv init --app
-   ```
-
-4. **Install dependencies**
-   ```bash
-   uv add fastapi pydantic google-generativeai python-dotenv manim uvicorn jinja2
-   ```
-
-5. **Set up environment variables**
+4. **Set up environment variables**
    ```bash
    cp .env.example .env
-   # Edit .env and add your GEMINI_API_KEY
    ```
    
-   Create a `.env` file with:
+   Then edit `.env` and add your actual Gemini API key:
    ```env
-   GEMINI_API_KEY=your_gemini_api_key_here
+   GEMINI_API_KEY=your_actual_api_key_here
    ```
+   
+   **Note:** The `.env` file is already in `.gitignore` and will not be committed to Git.
 
-6. **Create required directories**
+5. **Create required directories**
    ```bash
    mkdir -p videos static templates media
    ```
 
 ### Running the Application
 
-**Option 1: Use the run script (recommended)**
+**Option 1: Using pip (if you installed with pip)**
 ```bash
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+uvicorn main:app --reload --host 127.0.0.1 --port 8000
+```
+
+**Option 2: Using uv (if you installed with uv)**
+```bash
+uv run uvicorn main:app --reload --host 127.0.0.1 --port 8000
+```
+
+**Option 3: Using the run script**
+```bash
+# Make sure uv is in your PATH
+export PATH="$HOME/.local/bin:$PATH"
 ./run.sh
-```
-
-**Option 2: Manual start**
-```bash
-uv run uvicorn main:app --reload
-```
-
-**Option 3: Using virtual environment**
-```bash
-source .venv/bin/activate
-uvicorn main:app --reload
 ```
 
 ## 🌐 Usage

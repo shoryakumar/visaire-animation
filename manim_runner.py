@@ -48,6 +48,13 @@ def generate_animation(code: str) -> str:
 
     # Clean and write the Manim code to a Python file
     cleaned_code = clean_code(code)
+    
+    # Validate syntax before writing
+    try:
+        compile(cleaned_code, python_file, 'exec')
+    except SyntaxError as e:
+        raise ValueError(f"Generated code has syntax error at line {e.lineno}: {e.msg}")
+    
     with open(python_file, "w") as f:
         f.write(cleaned_code)
 
@@ -57,6 +64,7 @@ def generate_animation(code: str) -> str:
 
     # Run the Manim command to generate the video
     try:
+        import shutil
         subprocess.run([
             "manim",
             python_file,
@@ -66,27 +74,42 @@ def generate_animation(code: str) -> str:
             "-ql"  # ql = low quality for faster rendering
         ], check=True, capture_output=True, text=True)
         
-        # Manim creates the video in media/videos/[filename]/[quality]/[video_file]
+        # Manim creates the video in videos/videos/[filename]/[quality]/[video_file]
         # We need to move it to our desired location
-        actual_video_path = os.path.join("media", "videos", python_file.replace(".py", ""), "480p15", video_file)
-        if os.path.exists(actual_video_path):
-            import shutil
-            shutil.move(actual_video_path, video_path)
-        else:
+        possible_paths = [
+            os.path.join("videos", "videos", python_file.replace(".py", ""), "480p15", video_file),
+            os.path.join("media", "videos", python_file.replace(".py", ""), "480p15", video_file)
+        ]
+        
+        moved = False
+        for actual_video_path in possible_paths:
+            if os.path.exists(actual_video_path):
+                shutil.move(actual_video_path, video_path)
+                moved = True
+                break
+        
+        if not moved:
             # Fallback: find the generated video
-            for root, dirs, files in os.walk("media"):
+            for root, dirs, files in os.walk("videos"):
                 for file in files:
-                    if file.endswith(".mp4"):
+                    if file == video_file and file.endswith(".mp4"):
                         shutil.move(os.path.join(root, file), video_path)
+                        moved = True
                         break
+                if moved:
+                    break
                         
     except subprocess.CalledProcessError as e:
+        error_msg = f"Manim rendering failed: {e.stderr if e.stderr else e.stdout}"
         print(f"[ERROR] Manim failed: {e}")
         print(f"[ERROR] Command output: {e.stdout}")
         print(f"[ERROR] Command error: {e.stderr}")
-        raise e
+        # Keep the file for debugging
+        print(f"[DEBUG] Generated code saved to: {python_file}")
+        raise RuntimeError(error_msg)
     finally:
-        if os.path.exists(python_file):
+        # Only remove if successful
+        if os.path.exists(python_file) and os.path.exists(video_path):
             os.remove(python_file)
 
     return video_path
