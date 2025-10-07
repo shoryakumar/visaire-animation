@@ -30,20 +30,23 @@ class VisaireApp {
 
     async checkApiStatus() {
         const statusElement = document.getElementById('api-status');
+        const statusBadge = document.getElementById('status-badge');
+        const pulseDot = statusBadge.querySelector('.pulse-dot');
+        
         try {
             const response = await fetch('/health');
             const data = await response.json();
             
             if (data.status === 'healthy') {
-                statusElement.textContent = 'Online';
-                statusElement.className = 'text-success';
+                statusElement.textContent = 'Online & Ready';
+                pulseDot.style.color = '#10b981'; // Green
             } else {
-                statusElement.textContent = 'Issues detected';
-                statusElement.className = 'text-warning';
+                statusElement.textContent = 'Issues Detected';
+                pulseDot.style.color = '#f59e0b'; // Amber
             }
         } catch (error) {
             statusElement.textContent = 'Offline';
-            statusElement.className = 'text-danger';
+            pulseDot.style.color = '#ef4444'; // Red
         }
     }
 
